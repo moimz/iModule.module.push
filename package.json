@@ -19,7 +19,7 @@
 	},
 	"language":"ko",
 	"admin":true,
-	"context":false,
+	"context":true,
 	"global":true,
 	"article":false,
 	"databases":{
@@ -27,42 +27,50 @@
 			"columns":{
 				"midx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"수신회원고유번호"
 				},
 				"module":{
 					"type":"varchar",
-					"length":20
+					"length":20,
+					"comment":"알림을전송한모듈명"
+				},
+				"type":{
+					"type":"varchar",
+					"length":20,
+					"comment":"알림을전송한대상종류"
+				},
+				"idx":{
+					"type":"int",
+					"length":11,
+					"comment":"알림을전송한대상고유값"
 				},
 				"code":{
 					"type":"varchar",
-					"length":20
+					"length":20,
+					"comment":"알림종류"
 				},
-				"fromcode":{
-					"type":"varchar",
-					"length":20
-				},
-				"content":{
-					"type":"text"
+				"contents":{
+					"type":"longtext",
+					"comment":"알림내용"
 				},
 				"reg_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"알림시각"
 				},
-				"is_check":{
+				"is_checked":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
-				},
-				"is_read":{
-					"type":"enum",
-					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
+					"default":"FALSE",
+					"comment":"알림확인여부"
 				}
 			},
 			"indexes":{
-				"midx,module,code,fromcode":"primary_key",
+				"midx,module,type,idx,code":"primary_key",
 				"midx":"index"
-			}
+			},
+			"comment":"알림메세지 테이블"
 		}
 	}
 }

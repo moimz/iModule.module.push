@@ -13,7 +13,7 @@
 	"error":{
 		"notFound":"알림메세지가 없습니다."
 	},
-	"contexts":{
+	"context":{
 		"list":"전체알림목록"
 	}
 }
