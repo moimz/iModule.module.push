@@ -581,25 +581,46 @@ class ModulePush {
 		}
 	}
 	
-	function cancelPush($target,$module,$code,$fromcode,$content=array()) {
-		if (is_numeric($target) == false) return;
+	/**
+	 * 알림메세지를 삭제한다.
+	 * 알림메세지를 받은사람이 해당 알림을 읽지 않았을 경우에만 삭제된다.
+	 *
+	 * @param int/string $target 알림을 받는사람 (회원고유번호 또는 이메일)
+	 * @param string $module 알림메세지가 발생한 대상모듈
+	 * @param string $type 알림메세지가 발생한 대상종류
+	 * @param string $idx 알림메세지가 발생한 대상고유번호
+	 * @param string $code 알림종류
+	 * @param any[] $content 메세지 내용
+	 * @return boolean $success
+	 */
+	function cancelPush($target,$module,$type,$idx,$code,$content=array()) {
+		if (is_numeric($target) == false) return false;
 		
-		$check = $this->db()->select($this->table->push)->where('midx',$target)->where('module',$module)->where('code',$code)->where('fromcode',$fromcode)->where('is_check','FALSE')->getOne();
-		if ($check != null) {
-			$prevContents = json_decode($check->content,true);
-			$contents = array();
-			for ($i=0, $loop=count($prevContents);$i<$loop;$i++) {
-				if (count(array_diff($prevContents[$i],$content)) > 0) {
-					$contents[] = $prevContents[$i];
-				}
-			}
-			
-			if (count($contents) == 0) {
-				$this->db()->delete($this->table->push)->where('midx',$target)->where('module',$module)->where('code',$code)->where('fromcode',$fromcode)->execute();
-			} else {
-				$this->db()->update($this->table->push,array('content'=>json_encode($contents,JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK)))->where('midx',$target)->where('module',$module)->where('code',$code)->where('fromcode',$fromcode)->execute();
+		/**
+		 * 전송된 알림메세지가 있는지 확인한다.
+		 */
+		$check = $this->db()->select($this->table->push)->where('midx',$target)->where('module',$module)->where('type',$type)->where('idx',$idx)->where('code',$code)->getOne();
+		
+		/**
+		 * 전송된 알림메세지가 없거나, 이미 확인된 알림의 경우는 제외한다.
+		 */
+		if ($check == null || $check->is_checked == 'TRUE') return false;
+		
+		$prevContents = json_decode($check->contents,true);
+		$contents = array();
+		for ($i=0, $loop=count($prevContents);$i<$loop;$i++) {
+			if (count(array_diff($prevContents[$i],$content)) > 0) {
+				$contents[] = $prevContents[$i];
 			}
 		}
+		
+		if (count($contents) == 0) {
+			$this->db()->delete($this->table->push)->where('midx',$target)->where('module',$module)->where('type',$type)->where('idx',$idx)->where('code',$code)->execute();
+		} else {
+			$this->db()->update($this->table->push,array('contents'=>json_encode($contents,JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK)))->where('midx',$target)->where('module',$module)->where('type',$type)->where('idx',$idx)->where('code',$code)->execute();
+		}
+		
+		return true;
 	}
 	/*
 	function sendServer($channel,$data) {
