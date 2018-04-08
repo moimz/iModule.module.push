@@ -582,7 +582,7 @@ class ModulePush {
 	}
 	
 	/**
-	 * 알림메세지를 삭제한다.
+	 * 전송된 알림메세지를 취소한다.
 	 * 알림메세지를 받은사람이 해당 알림을 읽지 않았을 경우에만 삭제된다.
 	 *
 	 * @param int/string $target 알림을 받는사람 (회원고유번호 또는 이메일)
@@ -619,6 +619,22 @@ class ModulePush {
 		} else {
 			$this->db()->update($this->table->push,array('contents'=>json_encode($contents,JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK)))->where('midx',$target)->where('module',$module)->where('type',$type)->where('idx',$idx)->where('code',$code)->execute();
 		}
+		
+		return true;
+	}
+	
+	/**
+	 * 삭제할 알림메세지 유형에 해당하는 모든 알림메세지를 삭제한다.
+	 *
+	 * @param string $module 알림메세지가 발생한 대상모듈
+	 * @param string $type 알림메세지가 발생한 대상종류
+	 * @param string $idx 알림메세지가 발생한 대상고유번호
+	 * @param string $code 알림종류
+	 * @param any[] $content 메세지 내용
+	 * @return boolean $success
+	 */
+	function deletePush($module,$type,$idx) {
+		$this->db()->delete($this->table->push)->where('module',$module)->where('type',$type)->where('idx',$idx)->execute();
 		
 		return true;
 	}
