@@ -28,22 +28,22 @@
 				"midx":{
 					"type":"int",
 					"length":11,
-					"comment":"수신회원고유번호"
+					"comment":"회원고유값"
 				},
 				"module":{
 					"type":"varchar",
 					"length":20,
-					"comment":"알림을전송한모듈명"
+					"comment":"알림을 전송한 모듈명"
 				},
 				"type":{
 					"type":"varchar",
 					"length":20,
-					"comment":"알림을전송한대상종류"
+					"comment":"알림대상"
 				},
 				"idx":{
 					"type":"int",
 					"length":11,
-					"comment":"알림을전송한대상고유값"
+					"comment":"알림고유값"
 				},
 				"code":{
 					"type":"varchar",
@@ -64,13 +64,19 @@
 					"length":"'TRUE','FALSE'",
 					"default":"FALSE",
 					"comment":"알림확인여부"
+				},
+				"is_readed":{
+					"type":"enum",
+					"length":"'TRUE','FALSE'",
+					"default":"FALSE",
+					"comment":"읽음여부"
 				}
 			},
 			"indexes":{
 				"midx,module,type,idx,code":"primary_key",
 				"midx":"index"
 			},
-			"comment":"알림메세지 테이블"
+			"comment":"알림 수신내역 테이블"
 		}
 	}
 }
