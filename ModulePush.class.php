@@ -553,7 +553,9 @@ class ModulePush {
 	 * @param any[] $content 메세지 내용
 	 * @return boolean $success
 	 */
-	function sendPush($target,$module,$type,$idx,$code,$content=array()) {
+	function sendPush($target,$module,$type,$idx,$code,$content=array(),$reg_date=null) {
+		$reg_date = $reg_date == null ? time() : $reg_date;
+		
 		if (is_numeric($target) == true) { // 알림메세지로 전달
 			/**
 			 * 동일한 종류의 알림메세지가 있는지 확인한다.
@@ -571,7 +573,7 @@ class ModulePush {
 			}
 			
 			$contents[] = $content;
-			$this->db()->replace($this->table->push,array('midx'=>$target,'module'=>$module,'type'=>$type,'idx'=>$idx,'code'=>$code,'contents'=>json_encode($contents,JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK),'reg_date'=>time(),'is_checked'=>'FALSE'))->execute();
+			$this->db()->replace($this->table->push,array('midx'=>$target,'module'=>$module,'type'=>$type,'idx'=>$idx,'code'=>$code,'contents'=>json_encode($contents,JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK),'reg_date'=>$reg_date,'is_checked'=>'FALSE'))->execute();
 			
 			return true;
 		} else { // 이메일로 전달
