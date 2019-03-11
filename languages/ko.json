@@ -1,5 +1,9 @@
 {
-	"title":"알림",
+	"text":{
+		"push":"알림",
+		"new":"새로운 알림",
+		"previous":"이전 알림"
+	},
 	"list":{
 		"title":"알림 메세지",
 		"description":"회원님에게 전송된 모든 알림메세지를 확인할 수 있습니다.",
@@ -8,12 +12,13 @@
 	"button":{
 		"read_all":"모두 읽은상태로 표시",
 		"show_all":"모든 알림메세지 보기",
-		"config":"설정"
+		"setting":"설정"
 	},
 	"error":{
-		"notFound":"알림메세지가 없습니다."
+		"NOT_FOUND":"알림메세지가 없습니다."
 	},
 	"context":{
-		"list":"전체알림목록"
+		"list":"전체알림내역",
+		"setting":"알림설정"
 	}
 }

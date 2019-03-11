@@ -1,14 +1,14 @@
 <?php
 /**
- * 이 파일은 iModule 알림모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 알림모듈의 일부입니다. (https://www.imodules.io)
  *
  * 홈페이지 내 각종 알림기능과 관련된 전반적인 기능을 관리한다.
  * 
- * @file /modules/keyword/ModulePush.class.php
+ * @file /modules/push/ModulePush.class.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.0.0
- * @modified 2018. 2. 23.
+ * @modified 2019. 2. 23.
  */
 class ModulePush {
 	/**
@@ -62,7 +62,10 @@ class ModulePush {
 		 * 알림서비스 수신하기 위한 자바스크립트를 로딩한다.
 		 * 알림모듈은 글로벌모듈이기 때문에 모듈클래스 선언부에서 선언해주어야 사이트 레이아웃에 반영된다.
 		 */
-		$this->IM->addHeadResource('script',$this->Module->getDir().'/scripts/push.js');
+		if (defined('__IM_SITE__') == true) {
+			$this->IM->loadLanguage('module','push',$this->getModule()->getPackage()->language);
+			$this->IM->addHeadResource('script',$this->Module->getDir().'/scripts/script.js');
+		}
 	}
 	
 	/**
@@ -534,12 +537,99 @@ class ModulePush {
 		*/
 	}
 	
+	/**
+	 * 알림갯수를 가져온다.
+	 *
+	 * @param string $type 가져올형식 (ALL : 전체, UNCHECKED : 확인하지 않은 알림, UNREADED : 읽지 않은 알림)
+	 * @return int $count
+	 */
 	function getPushCount($type='ALL') {
+		if ($this->IM->getModule('member')->isLogged() == false) return 0;
+		
 		$check = $this->db()->select($this->table->push)->where('midx',$this->IM->getModule('member')->getLogged());
-		if ($type == 'UNCHECK') $check->where('is_check','FALSE');
-		elseif ($type == 'UNREAD') $check->where('is_read','FALSE');
+		if ($type == 'UNCHECKED') $check->where('is_checked','FALSE');
+		elseif ($type == 'UNREADED') $check->where('is_readed','FALSE');
 		
 		return $check->count();
+	}
+	
+	/**
+	 * 알림메세지를 가져온다.
+	 *
+	 * @param string $module 알림을 보낸 모듈명
+	 * @param int $code 알림코드
+	 * @param string $content 알림데이터
+	 * @return string $message
+	 */
+	function getPushMessage($module,$code,$contents) {
+		$mModule = $this->IM->getModule($module);
+		
+		$message = null;
+		if (method_exists($mModule,'syncPush') == true) {
+			$push = new stdClass();
+			$push->code = $code;
+			$push->contents = json_decode($contents);
+			$message = $mModule->syncPush('message',$push);
+		}
+		
+		if ($message == null) {
+			$message = new stdClass();
+			$message->message = '['.$module.'] '.$contents;
+			$message->icon = $this->getModule()->getDir().'/images/unknown.png';
+		}
+		
+		return $message;
+	}
+	
+	/**
+	 * 알림메세지를 확인할 주소를 가져온다.
+	 *
+	 * @param string $module 알림을 보낸 모듈명
+	 * @param string $type 알림종류
+	 * @param int $idx 알림대상 고유값
+	 * @return string $view
+	 */
+	function getPushView($module,$type,$idx) {
+		$this->readPush($module,$type,$idx);
+		
+		$mModule = $this->IM->getModule($module);
+		if (method_exists($mModule,'syncPush') == true) {
+			$push = new stdClass();
+			$push->type = $type;
+			$push->idx = $idx;
+			return $mModule->syncPush('view',$push);
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * 알림메세지를 확인한다.
+	 *
+	 * @param string $module 알림메세지가 발생한 대상모듈
+	 * @param string $type 알림메세지가 발생한 대상종류
+	 * @param string $idx 알림메세지가 발생한 대상고유번호
+	 * @param string $code 알림종류
+	 */
+	function checkPush($module,$type,$idx,$code) {
+		$midx = $this->IM->getModule('member')->getLogged();
+		if ($midx == 0) return;
+		
+		$this->db()->update($this->table->push,array('is_checked'=>'TRUE'))->where('midx',$midx)->where('module',$module)->where('type',$type)->where('idx',$idx)->where('code',$code)->execute();
+	}
+	
+	/**
+	 * 알림메세지를 확인한다.
+	 *
+	 * @param string $module 알림메세지가 발생한 대상모듈
+	 * @param string $type 알림메세지가 발생한 대상종류
+	 * @param string $idx 알림메세지가 발생한 대상고유번호
+	 */
+	function readPush($module,$type,$idx) {
+		$midx = $this->IM->getModule('member')->getLogged();
+		if ($midx == 0) return;
+		
+		$this->db()->update($this->table->push,array('is_checked'=>'TRUE','is_readed'=>'TRUE'))->where('midx',$midx)->where('module',$module)->where('type',$type)->where('idx',$idx)->execute();
 	}
 	
 	/**
@@ -569,7 +659,14 @@ class ModulePush {
 			if ($check == null || $check->is_checked == 'TRUE') {
 				$contents = array();
 			} else {
-				$contents = json_decode($check->contents);
+				$contents = json_decode($check->contents,true);
+			}
+			
+			/**
+			 * 기존알림메세지와 현재의 알림메세지가 일치하는지 확인한다.
+			 */
+			foreach ($contents as $diff) {
+				if (count(array_merge(array_diff($diff,$content),array_diff($content,$diff))) == 0) return;
 			}
 			
 			$contents[] = $content;

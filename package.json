@@ -12,8 +12,8 @@
 		"name":"Arzz",
 		"email":"arzz@arzz.com"
 	},
-	"homepage":"https://www.imodule.kr",
-	"versionChecker":"http://www.moimz.com/ko/api/moimz/getLatest",
+	"homepage":"https://www.imodules.io",
+	"versionChecker":"https://api.moimz.com/download/latest",
 	"dependencies":{
 		"core":"3.0.0"
 	},
@@ -21,7 +21,6 @@
 	"admin":true,
 	"context":true,
 	"global":true,
-	"article":false,
 	"databases":{
 		"push_table":{
 			"columns":{
@@ -74,7 +73,8 @@
 			},
 			"indexes":{
 				"midx,module,type,idx,code":"primary_key",
-				"midx":"index"
+				"midx":"index",
+				"module,type,idx,midx":"index"
 			},
 			"comment":"알림 수신내역 테이블"
 		}
