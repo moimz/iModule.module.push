@@ -57,6 +57,7 @@ var Push = {
 		$.send(ENV.getProcessUrl("push","getRecently"),{count:count},function(result) {
 			callback(result);
 			Push.updateBadge(result.count);
+			return false;
 		});
 	},
 	/**

@@ -40,8 +40,8 @@
 					"comment":"알림대상"
 				},
 				"idx":{
-					"type":"int",
-					"length":11,
+					"type":"varchar",
+					"length":40,
 					"comment":"알림고유값"
 				},
 				"code":{
