@@ -20,5 +20,13 @@
 	"context":{
 		"list":"전체알림내역",
 		"setting":"알림설정"
+	},
+	"admin":{
+		"configs":{
+			"form":{
+				"default_setting":"모듈기본설정",
+				"templet":"템플릿"
+			}
+		}
 	}
 }

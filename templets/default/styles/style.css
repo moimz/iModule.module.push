@@ -1,0 +1,16 @@
+/**
+ * 이 파일은 iModule 알림모듈의 일부입니다. (https://www.imodules.io)
+ *
+ * 알림 기본템플릿 - 스타일시트
+ * 
+ * @file /modules/push/templets/default/styles/style.css
+ * @author Arzz (arzz@arzz.com)
+ * @license MIT License
+ * @version 3.0.0
+ * @modified 2019. 4. 1.
+ */
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.type {width:100%; font-size:13px; line-height:1.6; white-space:normal; min-height:20px; padding:10px 10px 10px 5px;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method {width:50px; font-size:14px;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method > div[data-role=input] {font-size:0; display:block; width:100%; line-height:1; padding:8px 0px; min-height:0;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method > div[data-role=input] > label {display:block; padding:0; width:24px; height:24px; margin:0px auto;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method > div[data-role=input] > label > button.checkbox {margin:0; font-size:14px;}

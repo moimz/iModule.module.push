@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.0.0
- * @modified 2019. 2. 23.
+ * @modified 2019. 4. 1.
  */
 class ModulePush {
 	/**
@@ -36,6 +36,20 @@ class ModulePush {
 	private $oLang = null;
 	
 	/**
+	 * DB접근을 줄이기 위해 DB에서 불러온 데이터를 저장할 변수를 정의한다.
+	 *
+	 * @private $settings 알림설정정보
+	 * @private $defaultSettings 모듈별 기본알림설정정보
+	 */
+	private $settings = array();
+	private $defaultSettings = array();
+	
+	/**
+	 * 기본 URL (다른 모듈에서 호출되었을 경우에 사용된다.)
+	 */
+	private $baseUrl = null;
+	
+	/**
 	 * class 선언
 	 *
 	 * @param iModule $IM iModule 코어클래스
@@ -56,7 +70,7 @@ class ModulePush {
 		 */
 		$this->table = new stdClass();
 		$this->table->push = 'push_table';
-		$this->table->config = 'push_config_table';
+		$this->table->setting = 'push_setting_table';
 
 		/**
 		 * 알림서비스 수신하기 위한 자바스크립트를 로딩한다.
@@ -106,7 +120,27 @@ class ModulePush {
 	 * @return string $url
 	 */
 	function getUrl($view=null,$idx=null) {
-		return $this->IM->getUrl(null,null,$view,$idx);
+		$url = $this->baseUrl ? $this->baseUrl : $this->IM->getUrl(null,null,false);
+		
+		$view = $view === null ? $this->getView($this->baseUrl) : $view;
+		if ($view == null || $view == false) return $url;
+		$url.= '/'.$view;
+		
+		$idx = $idx === null ? $this->getIdx($this->baseUrl) : $idx;
+		if ($idx == null || $idx == false) return $url;
+		
+		return $url.'/'.$idx;
+	}
+	
+	/**
+	 * 다른모듈에서 호출된 경우 baseUrl 을 설정한다.
+	 *
+	 * @param string $url
+	 * @return $this
+	 */
+	function setUrl($url) {
+		$this->baseUrl = $this->IM->getUrl(null,null,$url,false);
+		return $this;
 	}
 	
 	/**
@@ -115,7 +149,7 @@ class ModulePush {
 	 * @return string $view
 	 */
 	function getView() {
-		return $this->IM->getView();
+		return $this->IM->getView($this->baseUrl);
 	}
 	
 	/**
@@ -124,7 +158,7 @@ class ModulePush {
 	 * @return string $idx
 	 */
 	function getIdx() {
-		return $this->IM->getIdx();
+		return $this->IM->getIdx($this->baseUrl);
 	}
 	
 	/**
@@ -156,6 +190,26 @@ class ModulePush {
 		$this->IM->fireEvent('afterGetApi',$this->getModule()->getName(),$api,$values,$data);
 		
 		return $data;
+	}
+	
+	/**
+	 * [사이트관리자] 모듈 설정패널을 구성한다.
+	 *
+	 * @return string $panel 설정패널 HTML
+	 */
+	function getConfigPanel() {
+		/**
+		 * 설정패널 PHP에서 iModule 코어클래스와 모듈코어클래스에 접근하기 위한 변수 선언
+		 */
+		$IM = $this->IM;
+		$Module = $this->getModule();
+		
+		ob_start();
+		INCLUDE $this->getModule()->getPath().'/admin/configs.php';
+		$panel = ob_get_contents();
+		ob_end_clean();
+		
+		return $panel;
 	}
 	
 	/**
@@ -390,11 +444,11 @@ class ModulePush {
 	 * @param object $configs 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정
 	 * @return string $html 컨텍스트 HTML
 	 */
-	function getContext($context,$config=null) {
+	function getContext($context,$configs=null) {
 		/**
 		 * 컨텍스트 컨테이너를 설정한다.
 		 */
-		$html = PHP_EOL.'<!-- PUSH MODULE -->'.PHP_EOL.'<div data-role="context" data-type="module" data-module="'.$this->getModule()->getName().'" data-context="'.$context.'">'.PHP_EOL;
+		$html = PHP_EOL.'<!-- PUSH MODULE -->'.PHP_EOL.'<div data-role="context" data-type="module" data-module="'.$this->getModule()->getName().'" data-base-url="'.($this->baseUrl == null ? $this->IM->getUrl(null,null,false) : $this->baseUrl).'" data-context="'.$context.'" data-configs="'.GetString(json_encode($configs),'input').'">'.PHP_EOL;
 		
 		/**
 		 * 컨텍스트 헤더
@@ -406,7 +460,11 @@ class ModulePush {
 		 */
 		switch ($context) {
 			case 'list' :
-				$html.= $this->getListContext($config);
+				$html.= $this->getListContext($configs);
+				break;
+				
+			case 'setting' :
+				$html.= $this->getSettingContext($configs);
 				break;
 		}
 		
@@ -537,6 +595,32 @@ class ModulePush {
 		*/
 	}
 	
+	function getSettingContext($configs=null) {
+		$pushes = array();
+		$modules = $this->getModule()->getModules();
+		foreach ($modules as $module) {
+			$mModule = $this->IM->getModule($module->module);
+			if (method_exists($mModule,'syncPush') == true && is_array($mModule->syncPush('list',null)) === true) {
+				$lists = $mModule->syncPush('list',null);
+				foreach ($lists as $key=>$title) {
+					$push = new stdClass();
+					$push->key = $module->module.'@'.$key;
+					$push->title = $title;
+					$push->settings = $this->getSetting($module->module,$key);
+					$pushes[] = $push;
+				}
+			}
+		}
+		
+		$header = PHP_EOL.'<form id="ModulePushSettingForm">'.PHP_EOL;
+		$footer = PHP_EOL.'</form>'.PHP_EOL.'<script>Push.init("ModulePushSettingForm");</script>'.PHP_EOL;
+		
+		/**
+		 * 템플릿파일을 호출한다.
+		 */
+		return $this->getTemplet($configs)->getContext('setting',get_defined_vars(),$header,$footer);
+	}
+	
 	/**
 	 * 알림갯수를 가져온다.
 	 *
@@ -604,6 +688,60 @@ class ModulePush {
 	}
 	
 	/**
+	 * 알림설정을 가져온다.
+	 *
+	 * @param string $module 모듈명
+	 * @param string $code 알림코드
+	 * @param int $midx 회원고유번호 (옵션)
+	 * @return boolean $is_allowed 알림수신여부
+	 */
+	function getSetting($module,$code,$midx=null) {
+		$midx = $midx == null ? $this->IM->getModule('member')->getLogged() : $midx;
+		if (isset($this->settings[$midx.'@'.$module.'@'.$code]) == true) return $this->settings[$midx.'@'.$module.'@'.$code];
+		
+		$settings = $this->db()->select($this->table->setting,'web,sms,email')->where('midx',$midx)->where('module',$module)->where('code',$code)->getOne();
+		if ($settings != null) {
+			$settings->web = $settings->web == 'TRUE';
+			$settings->sms = $settings->sms == 'TRUE';
+			$settings->email = $settings->email == 'TRUE';
+			$this->settings[$midx.'@'.$module.'@'.$code] = $settings;
+		} else {
+			$this->settings[$midx.'@'.$module.'@'.$code] = $this->getDefaultSetting($module,$code);
+		}
+		
+		return $this->settings[$midx.'@'.$module.'@'.$code];
+	}
+	
+	/**
+	 * 모듈별 기본 알림설정을 가져온다.
+	 *
+	 * @param string $module 모듈명
+	 * @param string $code 알림코드
+	 * @param string $method 알림방법 (web, sms, email)
+	 * @return boolean $is_allowed 알림수신여부
+	 */
+	function getDefaultSetting($module,$code) {
+		if (isset($this->defaultSettings[$module.'@'.$code]) == true) return $this->defaultSettings[$module.'@'.$code];
+		
+		$settings = null;
+		if ($module != 'core') {
+			$mModule = $this->IM->getModule($module);
+			if (method_exists($mModule,'syncPush') == true) {
+				$settings = $mModule->syncPush('setting',$code);
+			}
+		}
+		
+		if (is_object($settings) == false) {
+			$settings = new stdClass();
+			$settings->web = true;
+			$settings->sms = false;
+			$settings->email = false;
+		}
+		
+		return $settings;
+	}
+	
+	/**
 	 * 알림메세지를 확인한다.
 	 *
 	 * @param string $module 알림메세지가 발생한 대상모듈
@@ -635,7 +773,7 @@ class ModulePush {
 	/**
 	 * 알림메세지를 전송한다.
 	 *
-	 * @param int/string $target 알림을 받는사람 (회원고유번호 또는 이메일)
+	 * @param int/string $midx 알림을 받는 회원고유번호
 	 * @param string $module 알림메세지가 발생한 대상모듈
 	 * @param string $type 알림메세지가 발생한 대상종류
 	 * @param string $idx 알림메세지가 발생한 대상고유번호
@@ -643,14 +781,16 @@ class ModulePush {
 	 * @param any[] $content 메세지 내용
 	 * @return boolean $success
 	 */
-	function sendPush($target,$module,$type,$idx,$code,$content=array(),$reg_date=null) {
+	function sendPush($midx,$module,$type,$idx,$code,$content=array(),$reg_date=null) {
 		$reg_date = $reg_date == null ? time() : $reg_date;
 		
-		if (is_numeric($target) == true) { // 알림메세지로 전달
+		$setting = $this->getSetting($module,$code,$midx);
+		
+		if ($setting->web == true) {
 			/**
 			 * 동일한 종류의 알림메세지가 있는지 확인한다.
 			 */
-			$check = $this->db()->select($this->table->push)->where('midx',$target)->where('module',$module)->where('type',$type)->where('idx',$idx)->where('code',$code)->getOne();
+			$check = $this->db()->select($this->table->push)->where('midx',$midx)->where('module',$module)->where('type',$type)->where('idx',$idx)->where('code',$code)->getOne();
 			
 			/**
 			 * 동일한 종류의 알림메세지가 없거나, 알림메세지를 이미 확인한 경우 이전 알림내역을 덮어쓴고,
@@ -665,19 +805,38 @@ class ModulePush {
 			/**
 			 * 기존알림메세지와 현재의 알림메세지가 일치하는지 확인한다.
 			 */
+			$is_diff = true;
 			foreach ($contents as $diff) {
-				if (count(array_merge(array_diff($diff,$content),array_diff($content,$diff))) == 0) return;
+				if (count(array_merge(array_diff($diff,$content),array_diff($content,$diff))) == 0) {
+					$is_diff = false;
+					break;
+				}
 			}
 			
-			$contents[] = $content;
-			$this->db()->replace($this->table->push,array('midx'=>$target,'module'=>$module,'type'=>$type,'idx'=>$idx,'code'=>$code,'contents'=>json_encode($contents,JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK),'reg_date'=>$reg_date,'is_checked'=>'FALSE'))->execute();
-			
-			return true;
-		} else { // 이메일로 전달
-			/**
-			 * @todo 알림메세지 이메일 전송
-			 */
+			if ($is_diff == true) {
+				$contents[] = $content;
+				$this->db()->replace($this->table->push,array('midx'=>$midx,'module'=>$module,'type'=>$type,'idx'=>$idx,'code'=>$code,'contents'=>json_encode($contents,JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK),'reg_date'=>$reg_date,'is_checked'=>'FALSE'))->execute();
+			}
 		}
+		
+		if ($setting->sms == true) {
+			$mModule = $this->IM->getModule($module);
+			if (method_exists($mModule,'syncPush') == true) {
+				$push = new stdClass();
+				$push->midx = $midx;
+				$push->code = $code;
+				$push->content = (object)$content;
+				$sms = $mModule->syncPush('sms',$push);
+				
+				if ($sms != null) {
+					$mSms = $this->IM->getModule('sms')->setReceiver($midx,isset($sms->receiver) == true && $sms->receiver != null ? $sms->receiver : null);
+					if (isset($sms->sender) == true && $sms->sender != null) $mSms->setSender(0,$sms->sender);
+					$mSms->setMessage($sms->message)->send();
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	/**

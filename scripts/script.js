@@ -7,12 +7,18 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.0.0
- * @modified 2019. 3. 2.
+ * @modified 2019. 4. 1.
  */
 var Push = {
 	midx:0,
 	latestCount:null,
 	isCheckerStarted:false,
+	init:function(id) {
+		var $form = $("#"+id);
+		if (id == "ModulePushSettingForm") {
+			$form.inits(Push.updateSetting);
+		}
+	},
 	/**
 	 * 확인하지 않은 알림갯수를 가져온다.
 	 */
@@ -45,6 +51,18 @@ var Push = {
 		}
 	},
 	/**
+	 * 알림설정을 저장한다.
+	 */
+	updateSetting:function($form) {
+		$form.send(ENV.getProcessUrl("push","saveSetting"),function(result) {
+			if (result.success == true) {
+				iModule.modal.alert(iModule.getText("text/info"),iModule.getText("action/saved"),function() {
+					if (ENV.IS_CONTAINER_POPUP == true) self.close();
+				});
+			}
+		});
+	},
+	/**
 	 * 새로운 알림갯수를 가져온다.
 	 */
 	checker:function(interval) {
@@ -70,6 +88,12 @@ var Push = {
 				else if (typeof callback == "function") callback(result);
 			}
 		});
+	},
+	/**
+	 * 알림설정창을 불러온다.
+	 */
+	settingPopup:function() {
+		iModule.openPopup(ENV.getModuleUrl("push","@setting"),460,600,1,"setting");
 	},
 	readAll:function(e) {
 		$.ajax({

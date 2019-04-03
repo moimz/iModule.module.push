@@ -21,6 +21,12 @@
 	"admin":true,
 	"context":true,
 	"global":true,
+	"configs":{
+		"templet":{
+			"type":"templet",
+			"default":"default"
+		}
+	},
 	"databases":{
 		"push_table":{
 			"columns":{
@@ -77,6 +83,47 @@
 				"module,type,idx,midx":"index"
 			},
 			"comment":"알림 수신내역 테이블"
+		},
+		"push_setting_table":{
+			"columns":{
+				"midx":{
+					"type":"int",
+					"length":11,
+					"comment":"회원고유값"
+				},
+				"module":{
+					"type":"varchar",
+					"length":20,
+					"comment":"알림을 전송한 모듈명"
+				},
+				"code":{
+					"type":"varchar",
+					"length":20,
+					"comment":"알림종류"
+				},
+				"web":{
+					"type":"enum",
+					"length":"'TRUE','FALSE'",
+					"default":"TRUE",
+					"comment":"웹"
+				},
+				"sms":{
+					"type":"enum",
+					"length":"'TRUE','FALSE'",
+					"default":"FALSE",
+					"comment":"모바일"
+				},
+				"email":{
+					"type":"enum",
+					"length":"'TRUE','FALSE'",
+					"default":"FALSE",
+					"comment":"이메일"
+				}
+			},
+			"indexes":{
+				"midx,module,code":"primary_key"
+			},
+			"comment":"알림 수신여부설정 테이블"
 		}
 	}
 }
