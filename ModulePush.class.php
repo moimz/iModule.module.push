@@ -836,6 +836,27 @@ class ModulePush {
 			}
 		}
 		
+		if ($setting->email == true) {
+			$mModule = $this->IM->getModule($module);
+			if (method_exists($mModule,'syncPush') == true) {
+				$member = $this->IM->getModule('member')->getMember($midx);
+				
+				$push = new stdClass();
+				$push->midx = $midx;
+				$push->code = $code;
+				$push->content = (object)$content;
+				$email = $mModule->syncPush('email',$push);
+				
+				if ($email != null) {
+					$mEmail = $this->IM->getModule('email')->addTo(isset($email->receiver) == true && $email->receiver != null ? $email->receiver : $member->email);
+					if (isset($email->sender) == true && $email->sender != null) $mEmail->setFrom($email->sender);
+					$mEmail->setSubject($email->title);
+					$mEmail->setContent($email->message,true);
+					$mEmail->send();
+				}
+			}
+		}
+		
 		return true;
 	}
 	
@@ -896,29 +917,6 @@ class ModulePush {
 		
 		return true;
 	}
-	/*
-	function sendServer($channel,$data) {
-		$ELEPHANTIO_PATH = $this->Module->getPath().'/classes/elephant.io/src';
-		
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Client.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/AbstractPayload.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/EngineInterface.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Engine/AbstractSocketIO.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Engine/SocketIO/Session.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Engine/SocketIO/Version1X.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Exception/MalformedUrlException.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Exception/ServerConnectionFailureException.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Exception/SocketException.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Exception/UnsupportedActionException.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Exception/UnsupportedTransportException.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Payload/Decoder.php';
-		REQUIRE_ONCE $ELEPHANTIO_PATH.'/Payload/Encoder.php';
-		
-		$EIO = new ElephantIO\Client(new ElephantIO\Engine\SocketIO\Version1X('http://127.0.0.1:3000',['timeout'=>5]));
-		$EIO->initialize();
-		$EIO->emit('push',array($channel,$data));
-		$EIO->close();
-	}*/
 	
 	/**
 	 * 현재 모듈에서 처리해야하는 요청이 들어왔을 경우 처리하여 결과를 반환한다.
