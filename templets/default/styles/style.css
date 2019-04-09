@@ -6,7 +6,7 @@
  * @file /modules/push/templets/default/styles/style.css
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0
+ * @version 3.1.0
  * @modified 2019. 4. 1.
  */
 div[data-module=push][data-context=setting] ul[data-role=table] > li > span.type {width:100%; font-size:13px; line-height:1.6; white-space:normal; min-height:20px; padding:10px 10px 10px 5px;}
