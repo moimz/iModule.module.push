@@ -531,68 +531,32 @@ class ModulePush {
 	 * @return $html 컨텍스트 HTML
 	 */
 	function getListContext($configs=null) {
-		/*
-		ob_start();
+		$header = PHP_EOL.'<form id="ModulePushListForm">'.PHP_EOL;
+		$footer = PHP_EOL.'</form>'.PHP_EOL.'<script>Push.init("ModulePushListForm");</script>'.PHP_EOL;
 		
-		if (preg_match('/\.php$/',$config->templet) == true) {
-			$temp = explode('/',$config->templet);
-			$templetFile = array_pop($temp);
-			$templetPath = implode('/',$temp);
-			$templetDir = str_replace(__IM_PATH__,__IM_DIR__,$templetPath);
-		} else {
-			if (preg_match('/^@/',$config->templet) == true) {
-				$templetPath = $this->IM->getTempletPath().'/templets/modules/push/templets/'.preg_replace('/^@/','',$config->templet);
-				$templetDir = $this->IM->getTempletDir().'/templets/modules/push/templets/'.preg_replace('/^@/','',$config->templet);
-			} else {
-				$templetPath = $this->Module->getPath().'/templets/'.$config->templet;
-				$templetDir = $this->Module->getDir().'/templets/'.$config->templet;
-			}
+		$p = $this->getView() && is_numeric($this->getView()) == true ? $this->getView() : 1;
+		$limit = 10;
+		$start = ($p - 1) * $limit;
 		
-			if (file_exists($templetPath.'/styles/style.css') == true) {
-				$this->IM->addSiteHeader('style',$templetDir.'/styles/style.css');
-			}
-			
-			$templetFile = 'templet.php';
-		}
-		
-		$page = Request('p') ? Request('p') : 1;
-		$start = ($page - 1) * 20;
 		$lists = $this->db()->select($this->table->push)->where('midx',$this->IM->getModule('member')->getLogged());
 		$total = $lists->copy()->count();
-		$lists = $lists->limit($start,20)->orderBy('reg_date','desc')->get();
+		$lists = $lists->limit($start,$limit)->orderBy('reg_date','desc')->get();
 		for ($i=0, $loop=count($lists);$i<$loop;$i++) {
-			if ($this->IM->Module->isInstalled($lists[$i]->module) == true) {
-				$mModule = $this->IM->getModule($lists[$i]->module);
-				if (method_exists($mModule,'getPush') == true) {
-					$lists[$i]->push = $mModule->getPush($lists[$i]->code,$lists[$i]->fromcode,json_decode($lists[$i]->content));
-				} else {
-					$lists[$i]->content = $lists[$i]->module.'@'.$lists[$i]->code.'@'.$lists[$i]->content;
-				}
-			} else {
-				$lists[$i]->content = $lists[$i]->module.'@'.$lists[$i]->code.'@'.$lists[$i]->content;
-			}
+			$message = $this->getPushMessage($lists[$i]->module,$lists[$i]->code,$lists[$i]->contents);
+			$lists[$i]->message = $message->message;
+			$lists[$i]->icon = $message->icon;
+			$lists[$i]->is_checked = $lists[$i]->is_checked == 'TRUE';
+			$lists[$i]->is_readed = $lists[$i]->is_readed == 'TRUE';
 			
-			if ($lists[$i]->is_check == 'FALSE') {
-				$this->db()->update($this->table->push,array('is_check'=>'TRUE'))->where('midx',$lists[$i]->midx)->where('module',$lists[$i]->module)->where('code',$lists[$i]->code)->where('fromcode',$lists[$i]->fromcode)->execute();
-			}
+			$this->checkPush($lists[$i]->module,$lists[$i]->type,$lists[$i]->idx,$lists[$i]->code);
 		}
 		
-		$pagination = GetPagination($page,ceil($total/20),7,'LEFT',$this->IM->getUrl(null,null,false));
+		$pagination = $this->getTemplet($configs)->getPagination($p,ceil($total/$limit),5,$this->getUrl('{PAGE}',false));
 		
-		$IM = $this->IM;
-		$Module = $this;
-		$Module->templetPath = $templetPath;
-		$Module->templetDir = $templetDir;
-		
-		if (file_exists($templetPath.'/'.$templetFile) == true) {
-			INCLUDE $templetPath.'/'.$templetFile;
-		}
-		
-		$context = ob_get_contents();
-		ob_end_clean();
-		
-		return $context;
-		*/
+		/**
+		 * 템플릿파일을 호출한다.
+		 */
+		return $this->getTemplet($configs)->getContext('list',get_defined_vars(),$header,$footer);
 	}
 	
 	function getSettingContext($configs=null) {

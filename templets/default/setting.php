@@ -11,6 +11,7 @@
  * @modified 2019. 4. 1.
  */
 if (defined('__IM__') == false) exit;
+
 $IM->loadWebFont('XEIcon');
 ?>
 <ul data-role="table" class="black inner">

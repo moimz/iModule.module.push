@@ -18,6 +18,29 @@ var Push = {
 		if (id == "ModulePushSettingForm") {
 			$form.inits(Push.updateSetting);
 		}
+		
+		if (id == "ModulePushListForm") {
+			$("button[data-action=view]",$form).on("click",function() {
+				var $button = $(this);
+				$.send(ENV.getProcessUrl("push","getView"),{module:$button.attr("data-module"),type:$button.attr("data-type"),idx:$button.attr("data-idx")},function(result) {
+					if (result.success == true) {
+						if (result.view) {
+							if (ENV.IS_CONTAINER_POPUP == true) {
+								if (window.opener !== undefined) {
+									window.opener.location.href = result.view
+								} else {
+									window.open(result.view);
+								}
+							} else {
+								location.href = result.view;
+							}
+						}
+						
+						$button.removeClass("unread");
+					}
+				});
+			});
+		}
 	},
 	/**
 	 * 확인하지 않은 알림갯수를 가져온다.
@@ -95,21 +118,21 @@ var Push = {
 	settingPopup:function() {
 		iModule.openPopup(ENV.getModuleUrl("push","@setting"),460,600,1,"setting");
 	},
-	readAll:function(e) {
-		$.ajax({
-			type:"POST",
-			url:ENV.getProcessUrl("push","readAll"),
-			data:{},
-			dataType:"json",
-			success:function(result) {
-				if (result.success == true) {
-					$("*[data-push=true]").addClass("readed").removeClass("unread");
-					$("*[data-push-badge=true]").html("0");
-				}
+	/**
+	 * 모든 알림보기 창을 불러온다.
+	 */
+	listPopup:function() {
+		iModule.openPopup(ENV.getModuleUrl("push","@list"),460,600,1,"list");
+	},
+	readAll:function() {
+		$.send(ENV.getProcessUrl("push","readAll"),function(result) {
+			if (result.success == true) {
+				if (typeof callback == "function") callback();
+				
+				$("button.unread",$("*[data-module=push]")).removeClass("unread");
+				Push.getCount();
 			}
 		});
-		
-		if (e) e.stopPropagation();
 	}
 };
 

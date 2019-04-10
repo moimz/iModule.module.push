@@ -9,6 +9,24 @@
  * @version 3.1.0
  * @modified 2019. 4. 1.
  */
+div[data-module=push] div[data-role=toolbar] {margin-bottom:10px; text-align:right; font-size:0;}
+div[data-module=push] div[data-role=toolbar] > button {height:40px; background:#b5b7c0; border:0px; cursor:pointer; vertical-align:middle; margin-left:5px; color:#fff;}
+div[data-module=push] div[data-role=toolbar] > button > i {width:40px; height:40px; line-height:40px; vertical-align:middle; text-align:center; font-size:14px;}
+div[data-module=push] div[data-role=toolbar] > button > span {height:40px; line-height:40px; display:inline-block; vertical-align:middle; padding-right:15px; font-size:14px;}
+div[data-module=push] div[data-role=toolbar] > button:hover {background:#828595;}
+
+div[data-module=push][data-context=list] ul[data-role=list] {list-style:none; width:100%; display:block; border-top:2px solid #222;}
+div[data-module=push][data-context=list] ul[data-role=list] > li {border-bottom:1px solid #dddfe2; font-size:0;}
+div[data-module=push][data-context=list] ul[data-role=list] > li.title {background:#f5f6f7; padding-left:8px; height:24px; line-height:24px; color:#666; font-size:12px;}
+div[data-module=push][data-context=list] ul[data-role=list] > li.message {height:100px; line-height:100px; text-align:center; color:#999; font-size:14px;}
+div[data-module=push][data-context=list] ul[data-role=list] > li > button {display:block; width:100%; border:0; padding:8px; background:transparent; cursor:pointer; font-size:0; box-sizing:border-box; text-align:left;}
+div[data-module=push][data-context=list] ul[data-role=list] > li > button > i.icon {width:42px; height:42px; border-radius:50%; display:inline-block; border:1px solid #ccc; background-color:#fff; background-size:cover; background-repeat:no-repeat; background-position:50% 50%; box-sizing:border-box; margin-right:10px; vertical-align:top;}
+div[data-module=push][data-context=list] ul[data-role=list] > li > button > div.text {width:calc(100% - 52px); display:inline-block; line-height:20px; padding:2px 0px; font-size:14px; color:#222; vertical-align:top;}
+div[data-module=push][data-context=list] ul[data-role=list] > li > button > div.text > time {display:block; height:20px; line-height:20px; color:#666; font-size:12px;}
+div[data-module=push][data-context=list] ul[data-role=list] > li > button.unread {background:#edf2fa;}
+div[data-widget=coursemos-userbar] div[data-role=profile] > section[data-role=push] > *[data-action] {width:100%; height:30px; line-height:30px; text-align:center; text-decoration:none; color:#2196F3; font-size:12px; display:block; cursor:pointer; border:0; background:transparent; border-top:1px solid #dddfe2;}
+div[data-module=push][data-context=list] div.pagination {padding:10px 0px; text-align:center;}
+
 div[data-module=push][data-context=setting] ul[data-role=table] > li > span.type {width:100%; font-size:13px; line-height:1.6; white-space:normal; min-height:20px; padding:10px 10px 10px 5px;}
 div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method {width:50px; font-size:14px;}
 div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method > div[data-role=input] {font-size:0; display:block; width:100%; line-height:1; padding:8px 0px; min-height:0;}
