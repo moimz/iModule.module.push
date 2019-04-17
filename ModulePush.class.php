@@ -875,7 +875,7 @@ class ModulePush {
 		$prevContents = json_decode($check->contents,true);
 		$contents = array();
 		for ($i=0, $loop=count($prevContents);$i<$loop;$i++) {
-			if (count(array_diff($prevContents[$i],$content)) > 0) {
+			if (count(array_merge(array_diff($prevContents[$i],$content),array_diff($content,$prevContents[$i]))) > 0) {
 				$contents[] = $prevContents[$i];
 			}
 		}
