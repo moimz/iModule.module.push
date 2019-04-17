@@ -27,6 +27,16 @@
 				"default_setting":"모듈기본설정",
 				"templet":"템플릿"
 			}
+		},
+		"list":{
+			"title":"알림기록",
+			"columns":{
+				"module":"모듈명",
+				"code":"알림명",
+				"message":"알림내용",
+				"receiver":"수신자",
+				"reg_date":"전송일"
+			}
 		}
 	}
 }

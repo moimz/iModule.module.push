@@ -568,6 +568,8 @@ class ModulePush {
 				$lists = $mModule->syncPush('list',null);
 				foreach ($lists as $key=>$title) {
 					$push = new stdClass();
+					$push->module = $module->module;
+					$push->code = $key;
 					$push->key = $module->module.'@'.$key;
 					$push->title = $title;
 					$push->settings = $this->getSetting($module->module,$key);
@@ -605,9 +607,9 @@ class ModulePush {
 	 * 알림메세지를 가져온다.
 	 *
 	 * @param string $module 알림을 보낸 모듈명
-	 * @param int $code 알림코드
+	 * @param string $code 알림코드
 	 * @param string $content 알림데이터
-	 * @return string $message
+	 * @return object $message
 	 */
 	function getPushMessage($module,$code,$contents) {
 		$mModule = $this->IM->getModule($module);
@@ -630,15 +632,33 @@ class ModulePush {
 	}
 	
 	/**
+	 * 특정알림의 최근 알림메세지를 가져온다.
+	 *
+	 * @param string $module 알림을 보낸 모듈명
+	 * @param string $code 알림코드
+	 * @return object $message
+	 */
+	function getLatestMessage($module,$code,$midx=null) {
+		$midx = $midx == null ? $this->IM->getModule('member')->getLogged() : $midx;
+		$latest = $this->db()->select($this->table->push)->where('module',$module)->where('code',$code)->where('midx',$midx)->orderBy('reg_date','desc')->getOne();
+		if ($latest == null) return null;
+		
+		$message = $this->getPushMessage($module,$code,$latest->contents);
+		$message->reg_date = $latest->reg_date;
+		return $message;
+	}
+	
+	/**
 	 * 알림메세지를 확인할 주소를 가져온다.
 	 *
 	 * @param string $module 알림을 보낸 모듈명
 	 * @param string $type 알림종류
 	 * @param int $idx 알림대상 고유값
+	 * @param boolean $is_readed 읽음표시여부
 	 * @return string $view
 	 */
-	function getPushView($module,$type,$idx) {
-		$this->readPush($module,$type,$idx);
+	function getPushView($module,$type,$idx,$is_readed=true) {
+		if ($is_readed == true) $this->readPush($module,$type,$idx);
 		
 		$mModule = $this->IM->getModule($module);
 		if (method_exists($mModule,'syncPush') == true) {
@@ -663,11 +683,12 @@ class ModulePush {
 		$midx = $midx == null ? $this->IM->getModule('member')->getLogged() : $midx;
 		if (isset($this->settings[$midx.'@'.$module.'@'.$code]) == true) return $this->settings[$midx.'@'.$module.'@'.$code];
 		
+		$defaultSettings = $this->getDefaultSetting($module,$code);
 		$settings = $this->db()->select($this->table->setting,'web,sms,email')->where('midx',$midx)->where('module',$module)->where('code',$code)->getOne();
 		if ($settings != null) {
-			$settings->web = $settings->web == 'TRUE';
-			$settings->sms = $settings->sms == 'TRUE';
-			$settings->email = $settings->email == 'TRUE';
+			$settings->web = $defaultSettings->web === null ? null : $settings->web == 'TRUE';
+			$settings->sms = $defaultSettings->sms === null ? null : $settings->sms == 'TRUE';
+			$settings->email = $defaultSettings->email === null ? null : $settings->email == 'TRUE';
 			$this->settings[$midx.'@'.$module.'@'.$code] = $settings;
 		} else {
 			$this->settings[$midx.'@'.$module.'@'.$code] = $this->getDefaultSetting($module,$code);
@@ -697,7 +718,7 @@ class ModulePush {
 		
 		if (is_object($settings) == false) {
 			$settings = new stdClass();
-			$settings->web = true;
+			$settings->web = false;
 			$settings->sms = false;
 			$settings->email = false;
 		}
@@ -743,47 +764,49 @@ class ModulePush {
 	 * @param string $idx 알림메세지가 발생한 대상고유번호
 	 * @param string $code 알림종류
 	 * @param any[] $content 메세지 내용
+	 * @param boolean $is_replace 기존 알림내용 대체여부
 	 * @return boolean $success
 	 */
-	function sendPush($midx,$module,$type,$idx,$code,$content=array(),$reg_date=null) {
+	function sendPush($midx,$module,$type,$idx,$code,$content=array(),$is_replace=false,$reg_date=null) {
 		$reg_date = $reg_date == null ? time() : $reg_date;
 		
 		$setting = $this->getSetting($module,$code,$midx);
 		
-		if ($setting->web == true) {
-			/**
-			 * 동일한 종류의 알림메세지가 있는지 확인한다.
-			 */
-			$check = $this->db()->select($this->table->push)->where('midx',$midx)->where('module',$module)->where('type',$type)->where('idx',$idx)->where('code',$code)->getOne();
-			
-			/**
-			 * 동일한 종류의 알림메세지가 없거나, 알림메세지를 이미 확인한 경우 이전 알림내역을 덮어쓴고,
-			 * 그렇지 않은 경우 내용을 병합한다.
-			 */
-			if ($check == null || $check->is_checked == 'TRUE') {
-				$contents = array();
+		if ($setting->web === true) {
+			if ($is_replace == true) {
+				$contents = array($content);
 			} else {
-				$contents = json_decode($check->contents,true);
-			}
-			
-			/**
-			 * 기존알림메세지와 현재의 알림메세지가 일치하는지 확인한다.
-			 */
-			$is_diff = true;
-			foreach ($contents as $diff) {
-				if (count(array_merge(array_diff($diff,$content),array_diff($content,$diff))) == 0) {
-					$is_diff = false;
-					break;
+				/**
+				 * 동일한 종류의 알림메세지가 있는지 확인한다.
+				 */
+				$check = $this->db()->select($this->table->push)->where('midx',$midx)->where('module',$module)->where('type',$type)->where('idx',$idx)->where('code',$code)->getOne();
+				
+				/**
+				 * 동일한 종류의 알림메세지가 없거나, 알림메세지를 이미 확인한 경우 이전 알림내역을 덮어쓴고,
+				 * 그렇지 않은 경우 내용을 병합한다.
+				 */
+				if ($check == null || $check->is_checked == 'TRUE') {
+					$previous = array();
+				} else {
+					$previous = json_decode($check->contents,true);
 				}
+				
+				/**
+				 * 기존알림메세지와 동일한 알림메세지가 있다면 기존 알림을 제거한다.
+				 */
+				$contents = array();
+				foreach ($previous as $diff) {
+					if (count(array_merge(array_diff($diff,$content),array_diff($content,$diff))) > 0) {
+						$contents[] = $diff;
+					}
+				}
+				$contents[] = $content;
 			}
 			
-			if ($is_diff == true) {
-				$contents[] = $content;
-				$this->db()->replace($this->table->push,array('midx'=>$midx,'module'=>$module,'type'=>$type,'idx'=>$idx,'code'=>$code,'contents'=>json_encode($contents,JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK),'reg_date'=>$reg_date,'is_checked'=>'FALSE'))->execute();
-			}
+			$this->db()->replace($this->table->push,array('midx'=>$midx,'module'=>$module,'type'=>$type,'idx'=>$idx,'code'=>$code,'contents'=>json_encode($contents,JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK),'reg_date'=>$reg_date,'is_checked'=>'FALSE','is_readed'=>'FALSE'))->execute();
 		}
 		
-		if ($setting->sms == true) {
+		if ($setting->sms === true) {
 			$mModule = $this->IM->getModule($module);
 			if (method_exists($mModule,'syncPush') == true) {
 				$push = new stdClass();
@@ -800,7 +823,7 @@ class ModulePush {
 			}
 		}
 		
-		if ($setting->email == true) {
+		if ($setting->email === true) {
 			$mModule = $this->IM->getModule($module);
 			if (method_exists($mModule,'syncPush') == true) {
 				$member = $this->IM->getModule('member')->getMember($midx);

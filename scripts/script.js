@@ -105,7 +105,7 @@ var Push = {
 	 * 알림메세지를 확인한다.
 	 */
 	view:function(module,type,idx,callback) {
-		$.send(ENV.getProcessUrl("push","getView"),{module:module,type:type,idx:idx},function(result) {
+		$.send(ENV.getProcessUrl("push","@getView"),{module:module,type:type,idx:idx},function(result) {
 			if (result.success == true) {
 				if (result.view) location.href = result.view;
 				else if (typeof callback == "function") callback(result);
@@ -116,7 +116,7 @@ var Push = {
 	 * 알림설정창을 불러온다.
 	 */
 	settingPopup:function() {
-		iModule.openPopup(ENV.getModuleUrl("push","@setting"),460,600,1,"setting");
+		iModule.openPopup(ENV.getModuleUrl("push","@setting"),560,600,1,"setting");
 	},
 	/**
 	 * 모든 알림보기 창을 불러온다.
