@@ -13,30 +13,66 @@
 if (defined('__IM__') == false) exit;
 
 $IM->loadWebFont('XEIcon');
+$previous = null;
 ?>
 <ul data-role="table" class="black inner">
 	<li class="thead">
 		<span class="type">알림종류</span>
-		<span class="method"><i class="xi xi-monitor"></i></span>
-		<span class="method"><i class="xi xi-mobile"></i></span>
-		<span class="method"><i class="xi xi-envelope"></i></span>
+		<span class="method">
+			<div>웹</div>
+<!--
+			<div data-role="input">
+				<label><input type="checkbox" name="is_web_all"></label>
+			</div>
+-->
+		</span>
+		<span class="method">
+			<div>모바일</div>
+<!--
+			<div data-role="input">
+				<label><input type="checkbox" name="is_web_all"></label>
+			</div>
+-->
+		</span>
+		<span class="method">
+			<div>이메일</div>
+<!--
+			<div data-role="input">
+				<label><input type="checkbox" name="is_web_all"></label>
+			</div>
+-->
+		</span>
 	</li>
-	<?php foreach ($pushes as $push) { ?>
+	<?php foreach ($pushes as $push) { $latest = $me->getLatestMessage($push->module,$push->code); ?>
+	<?php if ($previous == null || $previous != $push->module) { $previous = $push->module; ?>
+	<li class="title">
+		<span><?php echo $me->getModule()->getTitle($push->module); ?></span>
+	</li>
+	<?php } ?>
 	<li class="tbody">
-		<span class="type"><?php echo $push->title; ?></span>
+		<span class="type">
+			<?php echo $push->title; ?>
+			<?php if ($latest !== null) { ?>
+			<div class="latest">
+				<i style="background-image:url(<?php echo $latest->icon; ?>);"></i>
+				<span><?php echo $latest->message; ?></span>
+				<time data-moment="fromNow" data-time="<?php echo $latest->reg_date; ?>"></time>
+			</div>
+			<?php } ?>
+		</span>
 		<span class="method">
 			<div data-role="input">
-				<label><input type="checkbox" name="<?php echo $push->key.'@web'; ?>" value="TRUE"<?php echo $push->settings->web == true ? ' checked="checked"' : ''; ?>></label>
+				<label><input type="checkbox" name="<?php echo $push->key.'@web'; ?>" value="TRUE"<?php echo $push->settings->web === true ? ' checked="checked"' : ''; ?><?php echo $push->settings->web === null ? ' disabled="disabled"' : ''; ?>></label>
 			</div>
 		</span>
 		<span class="method">
 			<div data-role="input">
-				<label><input type="checkbox" name="<?php echo $push->key.'@sms'; ?>" value="TRUE"<?php echo $push->settings->sms == true ? ' checked="checked"' : ''; ?>></label>
+				<label><input type="checkbox" name="<?php echo $push->key.'@sms'; ?>" value="TRUE"<?php echo $push->settings->sms === true ? ' checked="checked"' : ''; ?><?php echo $push->settings->sms === null ? ' disabled="disabled"' : ''; ?>></label>
 			</div>
 		</span>
 		<span class="method">
 			<div data-role="input">
-				<label><input type="checkbox" name="<?php echo $push->key.'@email'; ?>" value="TRUE"<?php echo $push->settings->email == true ? ' checked="checked"' : ''; ?>></label>
+				<label><input type="checkbox" name="<?php echo $push->key.'@email'; ?>" value="TRUE"<?php echo $push->settings->email === true ? ' checked="checked"' : ''; ?><?php echo $push->settings->email === null ? ' disabled="disabled"' : ''; ?>></label>
 			</div>
 		</span>
 	</li>

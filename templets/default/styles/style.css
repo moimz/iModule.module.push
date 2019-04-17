@@ -27,8 +27,19 @@ div[data-module=push][data-context=list] ul[data-role=list] > li > button.unread
 div[data-widget=coursemos-userbar] div[data-role=profile] > section[data-role=push] > *[data-action] {width:100%; height:30px; line-height:30px; text-align:center; text-decoration:none; color:#2196F3; font-size:12px; display:block; cursor:pointer; border:0; background:transparent; border-top:1px solid #dddfe2;}
 div[data-module=push][data-context=list] div.pagination {padding:10px 0px; text-align:center;}
 
+div[data-module=push][data-context=setting] ul[data-role=table] > li.title {background:#f5f6f7;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li.title > span {min-height:0; height:24px; line-height:24px; color:#666; padding-left:5px; font-weight:bold; font-size:13px;}
+
 div[data-module=push][data-context=setting] ul[data-role=table] > li > span.type {width:100%; font-size:13px; line-height:1.6; white-space:normal; min-height:20px; padding:10px 10px 10px 5px;}
-div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method {width:50px; font-size:14px;}
-div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method > div[data-role=input] {font-size:0; display:block; width:100%; line-height:1; padding:8px 0px; min-height:0;}
-div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method > div[data-role=input] > label {display:block; padding:0; width:24px; height:24px; margin:0px auto;}
-div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method > div[data-role=input] > label > button.checkbox {margin:0; font-size:14px;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.type > div.latest {background:#f4f4f4; border-radius:3px; padding:8px; margin-top:5px; font-size:0;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.type > div.latest:after {clear:both; content:" "; display:block;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.type > div.latest > i {width:36px; height:36px; display:block; float:left; border-radius:50%; box-sizing:border-box; background-size:cover; background-position:50% 50%; border:1px solid #e5e5e5;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.type > div.latest > span {display:inline-block; width:calc(100% - 46px); padding-left:10px; font-size:12px; height:20px; line-height:20px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.type > div.latest > time {font-size:11px; display:inline-block; width:calc(100% - 46px); padding-left:10px; color:#666;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method {width:70px; font-size:14px;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li.thead > span.method {padding:8px 0px 5px 0px; font-size:13px;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method > div[data-role=input] {font-size:0; display:block; width:100%; line-height:1; padding:2px 0px; min-height:0;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method > div[data-role=input] > label {display:block; padding:0; width:20px; height:20px; margin:0px auto;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li > span.method > div[data-role=input] > label > button.checkbox {width:20px; height:20px; margin:0; font-size:12px; line-height:18px;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li.tbody > span {vertical-align:top; height:40px; padding-top:8px;}
+div[data-module=push][data-context=setting] ul[data-role=table] > li.tbody > span.type {padding-top:10px;}
