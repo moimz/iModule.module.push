@@ -132,7 +132,7 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 				}),
 				listeners:{
 					itemdblclick:function(grid,record) {
-						$.send(ENV.getProcessUrl("push","getView"),{module:record.data.module,type:record.data.type,idx:record.data.idx},function(result) {
+						$.send(ENV.getProcessUrl("push","@getView"),{module:record.data.module,type:record.data.type,idx:record.data.idx},function(result) {
 							if (result.success == true) {
 								if (result.view) window.open(result.view);
 								else Ext.Msg.show({title:Admin.getText("alert/error"),msg:"이동할 URL주소가 없습니다.",buttons:Ext.Msg.OK,icon:Ext.Msg.ERROR});

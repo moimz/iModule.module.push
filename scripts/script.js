@@ -105,7 +105,7 @@ var Push = {
 	 * 알림메세지를 확인한다.
 	 */
 	view:function(module,type,idx,callback) {
-		$.send(ENV.getProcessUrl("push","@getView"),{module:module,type:type,idx:idx},function(result) {
+		$.send(ENV.getProcessUrl("push","getView"),{module:module,type:type,idx:idx},function(result) {
 			if (result.success == true) {
 				if (result.view) location.href = result.view;
 				else if (typeof callback == "function") callback(result);
