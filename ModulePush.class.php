@@ -566,12 +566,13 @@ class ModulePush {
 			$mModule = $this->IM->getModule($module->module);
 			if (method_exists($mModule,'syncPush') == true && is_array($mModule->syncPush('list',null)) === true) {
 				$lists = $mModule->syncPush('list',null);
-				foreach ($lists as $key=>$title) {
+				foreach ($lists as $key=>$value) {
 					$push = new stdClass();
 					$push->module = $module->module;
 					$push->code = $key;
 					$push->key = $module->module.'@'.$key;
-					$push->title = $title;
+					$push->group = $value->group;
+					$push->title = $value->title;
 					$push->settings = $this->getSetting($module->module,$key);
 					$pushes[] = $push;
 				}

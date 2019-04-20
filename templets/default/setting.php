@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.1.0
- * @modified 2019. 4. 1.
+ * @modified 2019. 4. 20.
  */
 if (defined('__IM__') == false) exit;
 
@@ -44,9 +44,9 @@ $previous = null;
 		</span>
 	</li>
 	<?php foreach ($pushes as $push) { $latest = $me->getLatestMessage($push->module,$push->code); ?>
-	<?php if ($previous == null || $previous != $push->module) { $previous = $push->module; ?>
+	<?php if ($previous == null || $previous != $push->module.'@'.$push->group) { $previous = $push->module.'@'.$push->group; ?>
 	<li class="title">
-		<span><?php echo $me->getModule()->getTitle($push->module); ?></span>
+		<span><?php echo $push->group; ?></span>
 	</li>
 	<?php } ?>
 	<li class="tbody">
