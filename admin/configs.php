@@ -16,7 +16,7 @@ if (defined('__IM__') == false) exit;
 new Ext.form.Panel({
 	id:"ModuleConfigForm",
 	border:false,
-	bodyPadding:10,
+	bodyPadding:"10 10 5 10",
 	width:500,
 	fieldDefaults:{labelAlign:"right",labelWidth:100,anchor:"100%",allowBlank:true},
 	items:[
