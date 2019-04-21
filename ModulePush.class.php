@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.1.0
- * @modified 2019. 4. 1.
+ * @modified 2019. 4. 21.
  */
 class ModulePush {
 	/**
@@ -551,6 +551,12 @@ class ModulePush {
 		return $this->getTemplet($configs)->getContext('list',get_defined_vars(),$header,$footer);
 	}
 	
+	/**
+	 * 알림설정 컨텍스트를 가져온다.
+	 *
+	 * @param object $confgs 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정
+	 * @return $html 컨텍스트 HTML
+	 */
 	function getSettingContext($configs=null) {
 		$pushes = array();
 		$modules = $this->getModule()->getModules();
@@ -926,61 +932,5 @@ class ModulePush {
 		
 		return $results;
 	}
-	
-	/*
-	function doProcess($action) {
-		$results = new stdClass();
-		$values = new stdClass();
-		
-		if ($action == 'recently') {
-			$count = Request('count');
-			$lists = $this->db()->select($this->table->push)->where('midx',$this->IM->getModule('member')->getLogged())->orderBy('reg_date','desc')->limit($count)->get();
-			
-			for ($i=0, $loop=count($lists);$i<$loop;$i++) {
-				$module = $this->IM->getModule($lists[$i]->module);
-				$content = $lists[$i]->midx.'/'.$lists[$i]->module.'/'.$lists[$i]->code.'/'.$lists[$i]->fromcode.'/'.$lists[$i]->content;
-				$lists[$i]->image = null;
-				$lists[$i]->link = null;
-				if (method_exists($module,'getPush') == true) {
-					$push = $module->getPush($lists[$i]->code,$lists[$i]->fromcode,json_decode($lists[$i]->content));
-					$lists[$i]->image = $push->image;
-					$lists[$i]->link = $push->link;
-					$lists[$i]->content = $push->link == null ? $content.'/'.$push->content : $push->content;
-				} else {
-					$lists[$i]->content = $content;
-				}
-				$lists[$i]->is_read = $lists[$i]->is_read == 'TRUE';
-			}
-			
-			$results->success = true;
-			$results->lists = $lists;
-		}
-		
-		if ($action == 'read') {
-			$target = Request('target');
-			$code = Request('code');
-			$fromcode = Request('fromcode');
-			
-			$check = $this->db()->select($this->table->push)->where('midx',$this->IM->getModule('member')->getLogged())->where('module',$target)->where('code',$code)->where('fromcode',$fromcode)->getOne();
-			if ($check == null) {
-				$results->success = false;
-			} else {
-				$results->success = true;
-				if ($check->is_read == 'FALSE') {
-					$this->db()->update($this->table->push,array('is_check'=>'TRUE','is_read'=>'TRUE'))->where('midx',$this->IM->getModule('member')->getLogged())->where('module',$target)->where('code',$code)->where('fromcode',$fromcode)->execute();
-				}
-			}
-		}
-		
-		if ($action == 'readAll') {
-			$this->db()->update($this->table->push,array('is_check'=>'TRUE','is_read'=>'TRUE'))->where('midx',$this->IM->getModule('member')->getLogged())->execute();
-			$results->success = true;
-		}
-		
-		$this->IM->fireEvent('afterDoProcess','push',$action,$values,$results);
-		
-		return $results;
-	}
-	*/
 }
 ?>
