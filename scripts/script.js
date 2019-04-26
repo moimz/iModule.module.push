@@ -7,7 +7,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.1.0
- * @modified 2019. 4. 1.
+ * @modified 2019. 4. 27.
  */
 var Push = {
 	midx:0,
@@ -107,8 +107,12 @@ var Push = {
 	view:function(module,type,idx,callback) {
 		$.send(ENV.getProcessUrl("push","getView"),{module:module,type:type,idx:idx},function(result) {
 			if (result.success == true) {
-				if (result.view) location.href = result.view;
-				else if (typeof callback == "function") callback(result);
+				if (typeof callback == "function") {
+					callback(result);
+				} else {
+					if (typeof callback == "object" && callback.is("button")) callback.removeClass("unread");
+					if (result.view) location.href = result.view;
+				}
 			}
 		});
 	},
