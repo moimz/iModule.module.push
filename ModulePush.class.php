@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.1.0
- * @modified 2019. 4. 21.
+ * @modified 2019. 6. 11.
  */
 class ModulePush {
 	/**
@@ -834,8 +834,10 @@ class ModulePush {
 				$email = $mModule->syncPush('email',$push);
 				
 				if ($email != null) {
-					$mEmail = $this->IM->getModule('email')->addTo(isset($email->receiver) == true && $email->receiver != null ? $email->receiver : $member->email);
-					if (isset($email->sender) == true && $email->sender != null) $mEmail->setFrom($email->sender);
+					$mEmail = $this->IM->getModule('email');
+					if (isset($email->receiver) == true && $email->receiver != null) $mEmail->addTo($email->receiver,isset($email->receiver_name) == true ? $email->receiver_name : null);
+					else $mEmail->addTo($member->email,$member->nickname);
+					if (isset($email->sender) == true && $email->sender != null) $mEmail->setFrom($email->sender,isset($email->sender_name) == true ? $email->sender_name : null);
 					$mEmail->setSubject($email->title);
 					$mEmail->setContent($email->message,true);
 					$mEmail->send();
