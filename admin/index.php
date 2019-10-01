@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license GPLv3
  * @version 3.0.0
- * @modified 2019. 4. 16.
+ * @modified 2019. 10. 2.
  */
 if (defined('__IM__') == false) exit;
 ?>
@@ -39,17 +39,67 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 							sorters:[{property:"sort",direction:"ASC"}],
 							fields:["idx","title",{name:"sort",type:"int"}]
 						}),
-						width:180,
+						width:140,
 						editable:false,
 						displayField:"title",
 						valueField:"module",
 						value:"",
+						matchFieldWidth:false,
+						listConfig:{
+							minWidth:180
+						},
 						listeners:{
 							change:function(form,value) {
+								Ext.getCmp("ModulePushModuleCodeList").getStore().getProxy().setExtraParam("module",value);
+								Ext.getCmp("ModulePushModuleCodeList").getStore().reload();
 								Ext.getCmp("ModulePushList").getStore().getProxy().setExtraParam("module",value);
+							}
+						}
+					}),
+					new Ext.form.ComboBox({
+						id:"ModulePushModuleCodeList",
+						store:new Ext.data.JsonStore({
+							proxy:{
+								type:"ajax",
+								url:ENV.getProcessUrl("push","@getCodes"),
+								extraParams:{is_all:"true"},
+								reader:{type:"json"}
+							},
+							autoLoad:true,
+							remoteSort:false,
+							sorters:[{property:"sort",direction:"ASC"}],
+							fields:["idx","code",{name:"sort",type:"int"}],
+							listeners:{
+								load:function(store) {
+									var index = store.findExact("code",Ext.getCmp("ModulePushModuleCodeList").getValue());
+									if (store.findExact("code",Ext.getCmp("ModulePushModuleCodeList").getValue()) === -1) {
+										Ext.getCmp("ModulePushModuleCodeList").setValue("");
+									} else {
+										Ext.getCmp("ModulePushModuleCodeList").setValue(store.getAt(index).get("code"));
+										Ext.getCmp("ModulePushList").getStore().loadPage(1);
+									}
+								}
+							}
+						}),
+						width:200,
+						editable:false,
+						displayField:"title",
+						valueField:"code",
+						matchFieldWidth:false,
+						listConfig:{
+							minWidth:200
+						},
+						value:"",
+						listeners:{
+							change:function(form,value) {
+								Ext.getCmp("ModulePushList").getStore().getProxy().setExtraParam("code",value);
 								Ext.getCmp("ModulePushList").getStore().loadPage(1);
 							}
 						}
+					}),
+					Admin.searchField("ModulePushKeyword",160,"수신자",function(keyword) {
+						Ext.getCmp("ModulePushList").getStore().getProxy().setExtraParam("keyword",keyword);
+						Ext.getCmp("ModulePushList").getStore().loadPage(1);
 					})
 				],
 				store:new Ext.data.JsonStore({

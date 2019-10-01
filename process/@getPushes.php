@@ -8,16 +8,24 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.0.0
- * @modified 2019. 4. 16.
+ * @modified 2019. 10. 2.
  */
 if (defined('__IM__') == false) exit;
+
+$module = Request('module');
+$code = Request('code');
+$keyword = Request('keyword');
 
 $start = Request('start');
 $limit = Request('limit');
 $sort = Request('sort');
 $dir = Request('dir');
 
-$lists = $this->db()->select($this->table->push);
+$mMember = $this->IM->getModule('member');
+$lists = $this->db()->select($this->table->push.' p','p.*')->join($mMember->getTable('member').' m','m.idx=p.midx','LEFT');
+if ($module) $lists->where('p.module',$module);
+if ($code) $lists->where('p.code',$code);
+if ($keyword) $lists->where('(m.name LIKE ? or m.nickname LIKE ?)',array('%'.$keyword.'%','%'.$keyword.'%'));
 $total = $lists->copy()->count();
 $lists = $lists->orderBy('reg_date','desc')->limit($start,$limit)->get();
 for ($i=0, $loop=count($lists);$i<$loop;$i++) {
