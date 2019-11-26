@@ -7,7 +7,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.1.0
- * @modified 2019. 4. 27.
+ * @modified 2019. 11. 26.
  */
 var Push = {
 	midx:0,
@@ -46,7 +46,7 @@ var Push = {
 	 * 확인하지 않은 알림갯수를 가져온다.
 	 */
 	getCount:function() {
-		$.send(ENV.getProcessUrl("push","getCount"),function(result) {
+		$.send(ENV.getProcessUrl("push","getCount"),{},function(result) {
 			if (result.success == true) {
 				Push.midx = result.midx;
 				Push.updateBadge(result.count);
@@ -55,7 +55,7 @@ var Push = {
 					Push.checker(result.interval * 1000);
 				}
 			}
-		});
+		},false);
 	},
 	/**
 	 * 알림뱃지수를 업데이트한다.
