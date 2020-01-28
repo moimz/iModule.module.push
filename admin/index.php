@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license GPLv3
  * @version 3.0.0
- * @modified 2019. 10. 2.
+ * @modified 2020. 1. 28.
  */
 if (defined('__IM__') == false) exit;
 ?>
@@ -214,6 +214,153 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 						menu.showAt(e.getXY());
 					}
 				}
+			}),
+			new Ext.grid.Panel({
+				id:"ModulePushTypeList",
+				title:Push.getText("admin/type/title"),
+				iconCls:"xi xi-postbox",
+				border:false,
+				tbar:[
+					Admin.searchField("ModulePushTypeKeyword",200,"알림명",function(keyword) {
+						Ext.getCmp("ModulePushTypeList").getStore().clearFilter();
+						
+						if (keyword.length > 0) {
+							Ext.getCmp("ModulePushTypeList").getStore().filter(function(record) {
+								var filter = (record.data.title != null && record.data.title.toString().indexOf(keyword) > -1);
+								return filter;
+							});
+						}
+					})
+				],
+				store:new Ext.data.JsonStore({
+					proxy:{
+						type:"ajax",
+						simpleSortMode:true,
+						url:ENV.getProcessUrl("push","@getPushTypes"),
+						reader:{type:"json"}
+					},
+					remoteSort:true,
+					sorters:[{property:"reg_date",direction:"DESC"}],
+					groupField:"group",
+					autoLoad:true,
+					pageSize:50,
+					fields:[""],
+					listeners:{
+						load:function(store,records,success,e) {
+							if (success == false) {
+								if (e.getError()) {
+									Ext.Msg.show({title:Admin.getText("alert/error"),msg:e.getError(),buttons:Ext.Msg.OK,icon:Ext.Msg.ERROR});
+								} else {
+									Ext.Msg.show({title:Admin.getText("alert/error"),msg:Admin.getText("error/load"),buttons:Ext.Msg.OK,icon:Ext.Msg.ERROR});
+								}
+							}
+						}
+					}
+				}),
+				columns:[{
+					text:Push.getText("admin/type/columns/title"),
+					width:250,
+					dataIndex:"title"
+				},{
+					text:Push.getText("admin/type/columns/web"),
+					width:80,
+					dataIndex:"settings",
+					align:"center",
+					renderer:function(value,p) {
+						var setting = value.web;
+						
+						if (setting == true) {
+							p.style = "color:blue;";
+							return Push.getText("admin/type/settings/active");
+						} else if (setting == false) {
+							p.style = "color:gray;";
+							return Push.getText("admin/type/settings/deactive");
+						} else {
+							p.style = "color:red;";
+							return Push.getText("admin/type/settings/disable");
+						}
+					}
+				},{
+					text:Push.getText("admin/type/columns/email"),
+					width:80,
+					dataIndex:"settings",
+					align:"center",
+					renderer:function(value,p) {
+						var setting = value.email;
+						
+						if (setting == true) {
+							p.style = "color:blue;";
+							return Push.getText("admin/type/settings/active");
+						} else if (setting == false) {
+							p.style = "color:gray;";
+							return Push.getText("admin/type/settings/deactive");
+						} else {
+							p.style = "color:red;";
+							return Push.getText("admin/type/settings/disable");
+						}
+					}
+				},{
+					text:Push.getText("admin/type/columns/mobile"),
+					width:80,
+					dataIndex:"settings",
+					align:"center",
+					renderer:function(value,p) {
+						var setting = value.mobile;
+						
+						if (setting == true) {
+							p.style = "color:blue;";
+							return Push.getText("admin/type/settings/active");
+						} else if (setting == false) {
+							p.style = "color:gray;";
+							return Push.getText("admin/type/settings/deactive");
+						} else {
+							p.style = "color:red;";
+							return Push.getText("admin/type/settings/disable");
+						}
+					}
+				},{
+					text:Push.getText("admin/type/columns/latest"),
+					width:140,
+					dataIndex:"latest",
+					align:"center",
+					renderer:function(value) {
+						if (value == null) return "-";
+						return moment(value * 1000).locale($("html").attr("lang")).format("YYYY.MM.DD(dd) HH:mm");
+					}
+				},{
+					text:Push.getText("admin/type/columns/latest_message"),
+					minWidth:200,
+					flex:1,
+					dataIndex:"latest_message",
+					renderer:function(value,p,record) {
+						if (value == null) return "";
+						
+						var sHTML = "";
+						if (value.icon) {
+							sHTML+= '<i style="display:inline-block; width:26px; height:26px; vertical-align:middle; background:url('+value.icon+') no-repeat 50% 50%; background-size:cover; border-radius:50%; border:1px solid #ccc; box-sizing:border-box; margin:-4px 5px -3px -5px;"></i>';
+						} else {
+							sHTML+= '<i style="display:inline-block; width:26px; height:26px; vertical-align:middle; border-radius:50%; border:1px solid #ccc; box-sizing:border-box; margin:-4px 5px -3px -5px; line-height:24px; color:#666; text-align:center;"><i class="mi mi-push"></i></i>';
+						}
+						
+						sHTML+= value.message;
+						
+						return sHTML;
+					}
+				}],
+				features:[{
+					ftype:"grouping",
+					groupHeaderTpl:"{name}",
+					hideGroupedHeader:false,
+					enableGroupingMenu:false
+				}],
+				bbar:[
+					new Ext.Button({
+						iconCls:"x-tbar-loading",
+						handler:function() {
+							Ext.getCmp("ModulePushTypeList").getStore().reload();
+						}
+					})
+				]
 			})
 		]
 	})

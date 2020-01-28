@@ -37,6 +37,22 @@
 				"receiver":"수신자",
 				"reg_date":"전송일"
 			}
+		},
+		"type":{
+			"title":"알림분류",
+			"columns":{
+				"title":"알림명",
+				"web":"웹사이트",
+				"email":"이메일",
+				"mobile":"모바일",
+				"latest":"최근발송일시",
+				"latest_message":"최근발송메시지"
+			},
+			"settings":{
+				"active":"기본활성",
+				"deactive":"기본비활성",
+				"disable":"사용불가"
+			}
 		}
 	}
 }

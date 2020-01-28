@@ -2,7 +2,7 @@
 /**
  * 이 파일은 iModule 알림모듈의 일부입니다. (https://www.imodules.io)
  *
- * 모듈목록을 가져온다.
+ * 전체알림목록을 가져온다.
  * 
  * @file /modules/push/process/@getPushes.php
  * @author Arzz (arzz@arzz.com)
