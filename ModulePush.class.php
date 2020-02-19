@@ -840,7 +840,7 @@ class ModulePush {
 					if (isset($email->sender) == true && $email->sender != null) $mEmail->setFrom($email->sender,isset($email->sender_name) == true ? $email->sender_name : null);
 					$mEmail->setSubject($email->title);
 					$mEmail->setContent($email->message,true);
-					$mEmail->send();
+					$mEmail->setPush(true)->send();
 				}
 			}
 		}
