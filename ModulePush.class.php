@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.1.0
- * @modified 2019. 6. 11.
+ * @modified 2020. 2. 19.
  */
 class ModulePush {
 	/**
@@ -817,7 +817,7 @@ class ModulePush {
 				if ($sms != null) {
 					$mSms = $this->IM->getModule('sms')->setReceiver($midx,isset($sms->receiver) == true && $sms->receiver != null ? $sms->receiver : null);
 					if (isset($sms->sender) == true && $sms->sender != null) $mSms->setSender(0,$sms->sender);
-					$mSms->setMessage($sms->message)->send();
+					$mSms->setPush(true)->setMessage($sms->message)->send();
 				}
 			}
 		}
