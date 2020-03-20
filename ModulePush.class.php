@@ -688,15 +688,14 @@ class ModulePush {
 			$settings->web = $defaultSettings->web === null ? null : $settings->web == 'TRUE';
 			$settings->sms = $defaultSettings->sms === null ? null : $settings->sms == 'TRUE';
 			$settings->email = $defaultSettings->email === null ? null : $settings->email == 'TRUE';
-			$this->settings[$midx.'@'.$module.'@'.$code] = $settings;
 		} else {
-			$this->settings[$midx.'@'.$module.'@'.$code] = $this->getDefaultSetting($module,$code);
+			$settings = $this->getDefaultSetting($module,$code);
 		}
 		
 		/**
 		 * 이벤트를 발생시켜 설정을 치환시킨다.
 		 */
-		$this->fireEvent('afterGetData',$this->getModule()->getName(),'setting',$settings);
+		$this->IM->fireEvent('afterGetData',$this->getModule()->getName(),'setting',$settings);
 		$this->settings[$midx.'@'.$module.'@'.$code] = $settings;
 		
 		return $this->settings[$midx.'@'.$module.'@'.$code];
