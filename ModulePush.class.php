@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.1.0
- * @modified 2020. 2. 19.
+ * @modified 2020. 3. 20.
  */
 class ModulePush {
 	/**
@@ -692,6 +692,12 @@ class ModulePush {
 		} else {
 			$this->settings[$midx.'@'.$module.'@'.$code] = $this->getDefaultSetting($module,$code);
 		}
+		
+		/**
+		 * 이벤트를 발생시켜 설정을 치환시킨다.
+		 */
+		$this->fireEvent('afterGetData',$this->getModule()->getName(),'setting',$settings);
+		$this->settings[$midx.'@'.$module.'@'.$code] = $settings;
 		
 		return $this->settings[$midx.'@'.$module.'@'.$code];
 	}
