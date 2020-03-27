@@ -820,6 +820,10 @@ class ModulePush {
 				$sms = $mModule->syncPush('sms',$push);
 				
 				if ($sms != null) {
+					if ($this->getModule()->getConfig('sms_include_link') == true) {
+						$link = $this->getPushView($module,$type,$idx,false);
+						if ($link != null) $sms->message.= ' '.$this->IM->getHost(true).$link;
+					}
 					$mSms = $this->IM->getModule('sms')->setReceiver($midx,isset($sms->receiver) == true && $sms->receiver != null ? $sms->receiver : null);
 					if (isset($sms->sender) == true && $sms->sender != null) $mSms->setSender(0,$sms->sender);
 					$mSms->setPush(true)->setMessage($sms->message)->send();

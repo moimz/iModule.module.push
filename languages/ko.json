@@ -25,7 +25,9 @@
 		"configs":{
 			"form":{
 				"default_setting":"모듈기본설정",
-				"templet":"템플릿"
+				"templet":"템플릿",
+				"push_setting":"알림세부설정",
+				"sms_include_link":"모바일로 알림발송시 알림에 해당하는 URL을 포함합니다."
 			}
 		},
 		"list":{

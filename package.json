@@ -25,6 +25,10 @@
 		"templet":{
 			"type":"templet",
 			"default":"default"
+		},
+		"sms_include_link":{
+			"type":"boolean",
+			"default":false
 		}
 	},
 	"databases":{

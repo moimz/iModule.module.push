@@ -25,6 +25,16 @@ new Ext.form.Panel({
 			items:[
 				Admin.templetField(Push.getText("admin/configs/form/templet"),"templet","module","push",false)
 			]
+		}),
+		new Ext.form.FieldSet({
+			title:Push.getText("admin/configs/form/push_setting"),
+			items:[
+				new Ext.form.Checkbox({
+					name:"sms_include_link",
+					boxLabel:Push.getText("admin/configs/form/sms_include_link"),
+					uncheckedValue:""
+				})
+			]
 		})
 	]
 });
