@@ -76,7 +76,7 @@ class ModulePush {
 		 * 알림서비스 수신하기 위한 자바스크립트를 로딩한다.
 		 * 알림모듈은 글로벌모듈이기 때문에 모듈클래스 선언부에서 선언해주어야 사이트 레이아웃에 반영된다.
 		 */
-		if (defined('__IM_SITE__') == true || defined('__IM_ADMIN__') == true) {
+		if (defined('__IM_SITE__') == true || defined('__IM_ADMIN__') == true || $this->IM->getModule('member')->isLogged() === true) {
 			$this->IM->loadLanguage('module','push',$this->getModule()->getPackage()->language);
 			$this->IM->addHeadResource('script',$this->getModule()->getDir().'/scripts/script.js');
 		}
