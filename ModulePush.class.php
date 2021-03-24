@@ -854,7 +854,7 @@ class ModulePush {
 			}
 		}
 		
-		return true;
+		return $this->db()->getLastError() == null ? true : $this->db()->getLastError() == null;
 	}
 	
 	/**
