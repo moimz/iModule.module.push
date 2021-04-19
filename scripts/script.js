@@ -27,7 +27,8 @@ var Push = {
 						if (result.view) {
 							if (ENV.IS_CONTAINER_POPUP == true) {
 								if (window.opener !== undefined) {
-									window.opener.location.href = result.view
+									window.opener.location.href = result.view;
+									if (iModule.isMobile == true) self.close();
 								} else {
 									window.open(result.view);
 								}
